@@ -34,3 +34,117 @@ To solve this permanently, the entire architecture was torn down, re-engineered,
 ### 3. State Management & Configuration Security
 * **Persistence Layer:** All critical application state, database records, and user preferences are mapped to isolated, externally managed Docker volumes (`jellyfin-config`, `sonarr-config`, etc.), decoupling state from ephemeral container lifecycles.
 * **Repository Hygiene:** Environment variables, sensitive credentials, and local data nodes are strictly excluded via `.gitignore`, ensuring the public repository remains a pristine, enterprise-ready infrastructure template.
+
+---
+
+## Operational Maintenance & Day-2 Playbook
+
+If you intend to deploy or adapt this architecture for your own infrastructure, review the following operational and maintenance guidelines to ensure long-term stability:
+
+### 1. Routine Maintenance & Upgrades
+* **Container Lifecycle Updates:** Upgrading container images should be handled sequentially to prevent database locking or config corruption:
+  ```bash
+  podman compose pull
+  podman compose down
+  podman compose up -d
+cat << 'EOF' > docker-compose.yml
+version: '3.8'
+
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - jellyfin-config:/config:z
+      - /var/lib/media:/data/media:z
+    ports:
+      - 8096:8096
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - sonarr-config:/config:z
+      - /var/lib/media:/data/media:z
+      - /mnt/ssd/downloads:/data/downloads:z
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - radarr-config:/config:z
+      - /var/lib/media:/data/media:z
+      - /mnt/ssd/downloads:/data/downloads:z
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - prowlarr-config:/config:z
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - WEBUI_PORT=8080
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    volumes:
+      - qbittorrent-config:/config:z
+      - /mnt/ssd/downloads:/data/downloads:z
+    ports:
+      - "0.0.0.0:8080:8080"
+      - "0.0.0.0:6881:6881"
+      - "0.0.0.0:6881:6881/udp"
+    restart: unless-stopped
+
+volumes:
+  jellyfin-config:
+    external: true
+  sonarr-config:
+    external: true
+  radarr-config:
+    external: true
+  prowlarr-config:
+    external: true
+  qbittorrent-config:
+    external: true
+---
+
+## Server Maintenance & Operations
+
+If you are planning to deploy this stack on a live server, please review the operational maintenance guidelines below to ensure long-term system stability and handle routine updates safely:
+
+* **Container Updates:** Always update sequentially to prevent database locks: `podman compose pull && podman compose down && podman compose up -d`
+* **Storage Monitoring:** Periodically check inode utilization and disk space on your high-speed storage paths (`df -h`, `df -i`).
+* **SELinux Contexts:** If permission errors occur after modifying host files, relabel the volume paths using `restorecon -Rvv`.
