@@ -46,7 +46,7 @@ If you are planning to deploy this stack on a live server, please review the ope
   ```bash
   podman compose pull
   podman compose down
-  podman compose up -d
+  podman compose up -d 
 
 Storage & Inode Monitoring: Periodically check inode utilization and disk space on your high-speed storage paths:
 Bash
@@ -61,3 +61,8 @@ Bash
 
 restorecon -Rvv /var/lib/media
 restorecon -Rvv /mnt/ssd/downloads
+
+Runtime Inspection: When a service stalls or crashes during startup, inspect persistent container logs rather than relying on standard output:
+Bash
+
+    podman logs -f <container_name>
