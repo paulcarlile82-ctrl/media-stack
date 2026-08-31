@@ -9,9 +9,8 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - jellyfin-config:/config
-      - /var/lib/media/movies:/movies:z
-      - /var/lib/media/tv:/tv:z
+      - jellyfin-config:/config:z
+      - /var/lib/media:/data/media:z
     ports:
       - 8096:8096
     restart: unless-stopped
@@ -24,9 +23,9 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - sonarr-config:/config
-      - /var/lib/media/tv:/tv:z
-      - /mnt/ssd/downloads:/downloads:z
+      - sonarr-config:/config:z
+      - /var/lib/media:/data/media:z
+      - /mnt/ssd/downloads:/data/downloads:z
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -39,9 +38,9 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - radarr-config:/config
-      - /var/lib/media/movies:/movies:z
-      - /mnt/ssd/downloads:/downloads:z
+      - radarr-config:/config:z
+      - /var/lib/media:/data/media:z
+      - /mnt/ssd/downloads:/data/downloads:z
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -54,7 +53,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - prowlarr-config:/config
+      - prowlarr-config:/config:z
     ports:
       - 9696:9696
     restart: unless-stopped
@@ -72,7 +71,7 @@ services:
       - 1.1.1.1
     volumes:
       - qbittorrent-config:/config:z
-      - /mnt/ssd/downloads:/downloads:z
+      - /mnt/ssd/downloads:/data/downloads:z
     ports:
       - "0.0.0.0:8080:8080"
       - "0.0.0.0:6881:6881"
