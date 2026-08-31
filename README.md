@@ -10,6 +10,13 @@ The evolution of this stack was driven by the classic infrastructure bottleneck:
 
 To solve this permanently, the entire architecture was torn down, re-engineered, and codified into a reproducible infrastructure-as-code pipeline using Docker Compose. The migration shifted the stack onto optimized SSD scratch space for high-velocity torrent ingestion, established a unified container path hierarchy to unlock zero-copy hardlinks, and baked strict Rocky Linux security compliance directly into the deployment logic.
 
+## Quick Start & Cloning
+
+To clone this repository and prepare your local environment for deployment:
+
+```bash
+git clone [https://github.com/paulcarlile82-ctrl/media-stack.git](https://github.com/paulcarlile82-ctrl/media-stack.git)
+cd media-stack/media-stack
 ---
 
 ## Architecture Stack
